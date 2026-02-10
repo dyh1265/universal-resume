@@ -1,7 +1,5 @@
 @import "docs/fira-go.css";
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import "tailwindcss";
 
 @screen print {
   @page {
@@ -13,7 +11,7 @@
 
   body {
     -webkit-print-color-adjust: exact !important;
-    color-adjust: exact !important;
+    print-color-adjust: exact !important;
     color: black !important;
   }
 
