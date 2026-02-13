@@ -1,0 +1,53 @@
+Name: Andrei Sirazitdinov
+Location: Mannheim, Germany
+Contact: dyh@list.ru | +49 176 47699707
+
+About:
+- Ph.D. in Computer Science
+- University of Heidelberg | Data Science, ML, AI, Computer Vision
+- As a researcher, I was focused on causal inference and individualized treatment effect estimation with deep learning. I also worked on explainable AI for healthcare and vision tasks. Permanent residency and full work authorization in Germany. Open to relocation.
+
+Research interests:
+- Causal inference, individualized treatment assignment, explainable ML
+- Built and evaluated deep learning models (MLPs, GANs, VAEs, GNNs) in TensorFlow, Keras, and PyTorch for healthcare decision support, privacy, and explainability.
+
+Experience:
+- University of Heidelberg, Germany (Apr 2020 – Oct 2025) — Ph.D. Candidate
+  - Individualized treatment assignment with MLPs, GANs, VAEs, and GNNs in TensorFlow/Keras.
+  - Pain patient treatment strategies using K-NN clustering and XGBoost with RCT validation.
+  - Explainable pathology patch classification with prototype learning and decision trees in PyTorch.
+  - Digital twin models using stable diffusion for patient data privacy in PyTorch.
+  - Dropout prediction model for cancer patients achieving 80% precision in TensorFlow.
+- National Institute of Informatics, Japan (Oct 2018 – Apr 2019) — Research Intern
+  - Computer vision algorithm for long-term video prediction using PyTorch.
+- Irkutsk Branch of MSTUCA, Russia (Oct 2014 – Jul 2015) — Student Assistant
+  - Built a multi-camera system to capture helicopter panel data and populate digital tables automatically.
+
+Education:
+- Ph.D. in Computer Science — University of Heidelberg, Germany (2020 – 2025)
+- M.Sc. in Visual Computing — Saarland University, Germany (2016 – 2019)
+- B.Sc. in Applied Informatics and Mathematics — Irkutsk State University, Russia (2012 – 2016)
+- High School — Irkutsk, Russia (2010 – 2012)
+
+Projects:
+- Trading Bots (Python) — WebSocket API | Docker | GitHub Actions
+- Local ChatGPT Clone — Streamlit | OpenAI API | SQLite
+- Databricks Integration — Centralized storage for chats and user authentication
+
+Skills:
+- ML/AI: TensorFlow, PyTorch, Scikit-learn, Keras
+- Data tools: Pandas, NumPy
+- Tools and platforms: Python, SQL, R, Docker, Kubernetes, MLflow, Azure (beginner), Git, Linux, Windows
+
+Languages:
+- English (Fluent speaking, reading, and writing)
+- German (B1 certificate, completed C1 courses)
+- Russian (Native)
+
+Selected publications:
+- A. Sirazitdinov et al., "Graph Neural Networks for Individual Treatment Effect Estimation," IEEE Access, 2024.
+- A. Sirazitdinov et al., "Review of Deep Learning Methods for Individual Treatment Effect Estimation with Automatic Hyperparameter Optimization," TechRxiv, 2022.
+
+Git Repos:
+- https://github.com/dyh1265/Causal-Inference-Library — Causal inference library for GNN-TARNet and related models; includes notebooks and code for the GNN-ITE paper.
+- https://github.com/dyh1265/PerPain-allocation — PerPain patient allocation system with two approaches: an R Shiny clustering app and Python ML models (TARnet, GNN-TARnet, GAT-TARnet, T-Learner) for individualized treatment recommendations.

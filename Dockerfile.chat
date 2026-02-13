@@ -1,0 +1,24 @@
+FROM node:20-alpine AS build
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY tailwind.css postcss.config.js tailwind.config.js ./
+COPY docs ./docs
+RUN npm run build
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY Fashion-bot-main/requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY Fashion-bot-main ./Fashion-bot-main
+COPY --from=build /app/docs ./docs
+
+ENV PORT=8080
+
+CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:8080", "Fashion-bot-main.app:app"]

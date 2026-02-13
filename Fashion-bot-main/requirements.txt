@@ -1,0 +1,4 @@
+flask==3.0.2
+python-dotenv==1.0.1
+openai==1.59.7
+gunicorn==22.0.0

@@ -439,6 +439,40 @@
 
         </section>
 
+        <section class="mt-8 first:mt-0">
+
+          <!-- To keep in the same column -->
+          <div class="break-inside-avoid">
+
+            <h2 class="mb-4 font-bold tracking-widest text-sm2 text-gray-550 print:font-normal">
+              CHAT
+            </h2>
+
+            <div class="cv-chat" data-chat-endpoint="/chat">
+              <div class="cv-chat-container">
+                <div class="cv-chat-header">
+                  <p class="cv-chat-header-title">Ask the CV Assistant</p>
+                </div>
+                <div class="cv-chat-content" id="cv-chat-box">
+                  <div class="cv-chat-row">
+                    <div class="cv-chat-bubble bot">Hello! Ask me about Andrei’s experience or skills.</div>
+                  </div>
+                </div>
+                <div class="cv-chat-footer">
+                  <input type="text" id="cv-chat-message" class="cv-chat-input" placeholder="Type your question...">
+                  <button type="button" class="cv-chat-submit" id="cv-chat-send">Send</button>
+                </div>
+              </div>
+            </div>
+
+            <p class="mt-2.1 text-md text-gray-650 leading-normal">
+              Note: the chat requires a backend service to respond.
+            </p>
+
+          </div>
+
+        </section>
+
       </div>
       <!-- end Column -->
 
@@ -446,6 +480,55 @@
     <!-- end Page -->
 
   </main>
+
+  <script>
+    (function () {
+      const chatRoot = document.querySelector(".cv-chat");
+      if (!chatRoot) return;
+
+      const endpoint = chatRoot.getAttribute("data-chat-endpoint");
+      const chatBox = document.getElementById("cv-chat-box");
+      const input = document.getElementById("cv-chat-message");
+      const sendBtn = document.getElementById("cv-chat-send");
+
+      async function sendMessage() {
+        const message = input.value.trim();
+        if (!message) return;
+
+        chatBox.insertAdjacentHTML("beforeend",
+          `<div class="cv-chat-row user"><div class="cv-chat-bubble user">${message}</div></div>`
+        );
+        input.value = "";
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        try {
+          const response = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message })
+          });
+          const reply = await response.text();
+          chatBox.insertAdjacentHTML("beforeend",
+            `<div class="cv-chat-row"><div class="cv-chat-bubble bot">${reply}</div></div>`
+          );
+        } catch (err) {
+          chatBox.insertAdjacentHTML("beforeend",
+            `<div class="cv-chat-row"><div class="cv-chat-bubble bot">Chat backend is unreachable.</div></div>`
+          );
+        }
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      sendBtn.addEventListener("click", sendMessage);
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          sendMessage();
+        }
+      });
+    })();
+  </script>
 
 </body>
 
