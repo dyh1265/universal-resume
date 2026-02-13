@@ -41,6 +41,98 @@ Only generate CSS that is used on the page, which results in a much smaller file
 npm run build
 ```
 
+Tutorial: What Was Done
+---------
+
+This project was updated and deployed as a static résumé site. Below is a concise walkthrough of the changes and deployment flow so you can repeat it.
+
+### 1) Update the content
+
+- Edit `docs/index.html` and replace the template content with your CV details.
+- Keep the overall structure (sections, headers, list items) so the layout stays consistent.
+
+### 2) Tailwind v4 + PostCSS fixes
+
+Tailwind v4 moved its PostCSS plugin to a separate package. The build pipeline was adjusted accordingly:
+
+```
+npm install @tailwindcss/postcss
+```
+
+In `postcss.config.js`, swap the Tailwind plugin for the new one and pass the config path:
+
+```
+require("@tailwindcss/postcss")({
+  config: "./tailwind.config.js"
+})
+```
+
+In `tailwind.css`, use the v4 import style:
+
+```
+@import "tailwindcss";
+```
+
+### 3) Two-column layout
+
+To force two columns on all screen sizes, use `col-count-2` (without the `md:` prefix) on the column container in `docs/index.html`:
+
+```
+<div class="col-count-2 print:col-count-2 col-gap-md h-letter-col print:h-letter-col col-fill-auto">
+```
+
+### 4) Replace deprecated CSS
+
+Autoprefixer warns about `color-adjust` being deprecated. Update this in `tailwind.css`:
+
+```
+print-color-adjust: exact !important;
+```
+
+### 5) Docker production container
+
+A production Docker image builds the CSS and serves the site via Nginx.
+
+```
+docker build -t universal-resume .
+docker run --rm -p 8080:80 universal-resume
+```
+
+### 6) Azure Static Website deployment
+
+This setup uses Azure Storage Static Website hosting.
+
+Install Azure CLI (Windows):
+
+```
+https://aka.ms/installazurecliwindows
+```
+
+Login (PowerShell needs the `&` call operator):
+
+```
+& "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" login --use-device-code
+```
+
+Then create resources and upload:
+
+```
+$rg = "universal-resume-rg"
+$loc = "germanywestcentral"
+$sa = "resumestatic" + (Get-Random -Maximum 99999)
+
+& "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" group create --name $rg --location $loc
+& "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" storage account create --name $sa --resource-group $rg --location $loc --sku Standard_LRS --kind StorageV2 --allow-blob-public-access true
+& "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" storage blob service-properties update --account-name $sa --static-website --index-document index.html --404-document index.html
+
+$web = & "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" storage account show --name $sa --resource-group $rg --query "primaryEndpoints.web" -o tsv
+
+$key = & "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" storage account keys list --account-name $sa --resource-group $rg --query "[0].value" -o tsv
+& "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" storage blob upload-batch --account-name $sa --account-key $key --destination '$web' --source .\docs
+
+$web
+```
+
 Starting Point
 ---------
 

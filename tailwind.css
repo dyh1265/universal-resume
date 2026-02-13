@@ -1,7 +1,5 @@
 @import "docs/fira-go.css";
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import "tailwindcss";
 
 @screen print {
   @page {
@@ -13,7 +11,7 @@
 
   body {
     -webkit-print-color-adjust: exact !important;
-    color-adjust: exact !important;
+    print-color-adjust: exact !important;
     color: black !important;
   }
 
@@ -82,4 +80,105 @@ body .icon-parent::before {
   width: 0px;
   visibility: hidden;
   display: inline-block;
+}
+
+/* Scoped chat widget styles (avoid global overrides) */
+.cv-chat {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.cv-chat-container {
+  background: rgb(245, 248, 251);
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 12px 24px 0px;
+  overflow: hidden;
+  width: 100%;
+  max-width: 22rem;
+  height: 26rem;
+  margin-top: 0.5rem;
+}
+
+.cv-chat-header {
+  align-items: center;
+  background: hsl(214, 17%, 32%);
+  color: rgb(255, 255, 255);
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+}
+
+.cv-chat-header-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.cv-chat-content {
+  height: 18rem;
+  overflow-y: auto;
+  margin-top: 2px;
+  padding: 0.5rem 0.5rem 0;
+}
+
+.cv-chat-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.cv-chat-row.user {
+  justify-content: flex-end;
+}
+
+.cv-chat-bubble {
+  font-size: 0.85rem;
+  line-height: 1.25rem;
+  max-width: 75%;
+  padding: 0.5rem 0.65rem;
+  border-radius: 12px;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 1px 2px 0px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.cv-chat-bubble.bot {
+  background: hsl(214, 17%, 32%);
+  color: #fff;
+  border-bottom-left-radius: 2px;
+}
+
+.cv-chat-bubble.user {
+  background: #fff;
+  color: #000;
+  border-bottom-right-radius: 2px;
+}
+
+.cv-chat-footer {
+  position: relative;
+}
+
+.cv-chat-input {
+  border-top: 1px solid rgb(238, 238, 238);
+  border-radius: 0 0 10px 10px;
+  box-shadow: none;
+  box-sizing: border-box;
+  font-size: 0.9rem;
+  outline: none;
+  padding: 0.75rem 3.5rem 0.75rem 0.6rem;
+  width: 100%;
+  appearance: none;
+}
+
+.cv-chat-submit {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0.6rem 0.75rem;
+  position: absolute;
+  right: 0;
+  top: 0;
+  color: hsl(214, 17%, 32%);
+  font-weight: 600;
 }
