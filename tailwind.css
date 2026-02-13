@@ -100,7 +100,7 @@ body .icon-parent::before {
 
 .cv-chat-header {
   align-items: center;
-  background: rgb(110, 72, 170);
+  background: hsl(214, 17%, 32%);
   color: rgb(255, 255, 255);
   display: flex;
   justify-content: space-between;
@@ -143,7 +143,7 @@ body .icon-parent::before {
 }
 
 .cv-chat-bubble.bot {
-  background: rgb(110, 72, 170);
+  background: hsl(214, 17%, 32%);
   color: #fff;
   border-bottom-left-radius: 2px;
 }
@@ -179,6 +179,6 @@ body .icon-parent::before {
   position: absolute;
   right: 0;
   top: 0;
-  color: rgb(71, 29, 138);
+  color: hsl(214, 17%, 32%);
   font-weight: 600;
 }

@@ -13,12 +13,12 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY Fashion-bot-main/requirements.txt ./
+COPY cv_chat/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY Fashion-bot-main ./Fashion-bot-main
+COPY cv_chat ./cv_chat
 COPY --from=build /app/docs ./docs
 
 ENV PORT=8080
 
-CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:8080", "Fashion-bot-main.app:app"]
+CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:8080", "cv_chat.app:app"]
