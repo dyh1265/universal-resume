@@ -34,41 +34,7 @@ Run dev server:
 npm run serve
 ```
 
-3) Free Hosting (Azure Static Website)
--------------------------------------
-Install Azure CLI:
-```
-https://aka.ms/installazurecliwindows
-```
-Login:
-```
-& "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" login --use-device-code
-```
-Create storage + upload:
-```
-$rg = "universal-resume-rg"
-$loc = "germanywestcentral"
-$sa = "resumestatic" + (Get-Random -Maximum 99999)
-
-& "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" group create --name $rg --location $loc
-& "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" storage account create --name $sa --resource-group $rg --location $loc --sku Standard_LRS --kind StorageV2 --allow-blob-public-access true
-& "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" storage blob service-properties update --account-name $sa --static-website --index-document index.html --404-document index.html
-
-$web = & "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" storage account show --name $sa --resource-group $rg --query "primaryEndpoints.web" -o tsv
-$key = & "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" storage account keys list --account-name $sa --resource-group $rg --query "[0].value" -o tsv
-& "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" storage blob upload-batch --account-name $sa --account-key $key --destination '$web' --source .\docs --overwrite true
-
-$web
-```
-
-Update static site later:
-```
-npm run build
-$key = & $az storage account keys list --account-name resumestatic15247 --resource-group universal-resume-rg --query "[0].value" -o tsv
-& $az storage blob upload-batch --account-name resumestatic15247 --account-key $key --destination '$web' --source .\docs --overwrite true
-```
-
-4) Container Apps (HTTPS, Paid)
+3) Container Apps (HTTPS, Paid)
 -------------------------------
 Build and deploy the combined CV + chat container:
 ```
@@ -110,21 +76,15 @@ Chat env vars:
   --set-env-vars AZURE_OPENAI_API_KEY=YOUR_KEY AZURE_OPENAI_ENDPOINT=YOUR_ENDPOINT
 ```
 
-5) CI/CD
---------
+4) CI/CD (Container Apps)
+-------------------------
 
-Static Website auto-deploy workflow: `.github/workflows/deploy-azure-static.yml`.+
+Example workflow: `.github/workflows/deploy-containerapp.yml`.
 Secrets:
-- `AZURE_STORAGE_ACCOUNT`
-- `AZURE_STORAGE_KEY`
-
-Container Apps CI/CD (example workflow is in this document, add `.github/workflows/deploy-containerapp.yml`):
-Secrets:
-- `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`
+- `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `AZURE_CLIENT_SECRET`
 - `ACR_NAME`, `RESOURCE_GROUP`, `CONTAINERAPP_NAME`
 - `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT`
 
 Notes
 -----
-- Azure Front Door is blocked on Free Trial/Student subscriptions.
 - Container Apps provides HTTPS by default but is not fully free.
