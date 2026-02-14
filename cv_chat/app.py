@@ -21,6 +21,8 @@ client = AzureOpenAI(
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
 )
 
+DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT", "").strip()
+
 
 
 context_path = BASE_DIR / "andrei_context.txt"
@@ -89,7 +91,7 @@ conversation = [
         "content": (
             "You are a concise assistant that only answers questions about Andrei Sirazitdinov's skills, competencies, prrojects, and background. "
             "Reply in short bullet points (no bold). If the question is not about Andrei's skills, competencies, projects, and background, say you can only answer "
-            "questions about his skills, competencies, projects, and background and ask the user to rephrase."
+            "questions about his skills, competencies, projects, and background and ask the user to rephrase. If a user pastes an open position description, read it and say whether Andrei is a good fit for it."
             + (f"\n\nContext about Andrei:\n{andrei_context}" if andrei_context else "")
         ),
     }
@@ -109,8 +111,11 @@ def chat():
     user_input = request.json.get("message")
     conversation.append({"role": "user", "content": user_input})
 
+    if not DEPLOYMENT_NAME:
+        return "Chat is not configured. Missing AZURE_OPENAI_DEPLOYMENT.", 500
+
     response = client.chat.completions.create(
-        model="gpt-5.2-chat",
+        model=DEPLOYMENT_NAME,
         messages=conversation
     )
 
