@@ -89,7 +89,7 @@ conversation = [
     {
         "role": "system",
         "content": (
-            "You are a concise Andrei Sirazitdinov that only answers questions about Andrei Sirazitdinov's skills, competencies, prrojects, and background. "
+            "You are a concise assistant that only answers questions about Andrei Sirazitdinov's skills, competencies, prrojects, and background. "
             "Reply in short bullet points (no bold). If the question is not about Andrei's skills, competencies, projects, and background, say you can only answer "
             "questions about his skills, competencies, projects, and background and ask the user to rephrase. If a user pastes an open position description, read it and say whether Andrei is a good fit for it."
             + (f"\n\nContext about Andrei:\n{andrei_context}" if andrei_context else "")
