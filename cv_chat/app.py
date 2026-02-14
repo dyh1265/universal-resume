@@ -21,6 +21,8 @@ client = AzureOpenAI(
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
 )
 
+DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT", "").strip()
+
 
 
 context_path = BASE_DIR / "andrei_context.txt"
@@ -109,8 +111,11 @@ def chat():
     user_input = request.json.get("message")
     conversation.append({"role": "user", "content": user_input})
 
+    if not DEPLOYMENT_NAME:
+        return "Chat is not configured. Missing AZURE_OPENAI_DEPLOYMENT.", 500
+
     response = client.chat.completions.create(
-        model="gpt-5.2-chat",
+        model=DEPLOYMENT_NAME,
         messages=conversation
     )
 
