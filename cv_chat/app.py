@@ -85,17 +85,17 @@ else:
 
 andrei_context = build_context_from_cv(DOCS_DIR / "index.html", raw_context)
 
-conversation = [
-    {
-        "role": "system",
-        "content": (
-            "You are a concise assistant that only answers questions about Andrei Sirazitdinov's skills, competencies, prrojects, and background. "
-            "Reply in short bullet points (no bold). If the question is not about Andrei's skills, competencies, projects, and background, say you can only answer "
-            "questions about his skills, competencies, projects, and background and ask the user to rephrase. If a user pastes an open position description, read it and say whether Andrei is a good fit for it."
-            + (f"\n\nContext about Andrei:\n{andrei_context}" if andrei_context else "")
-        ),
-    }
-]
+# Stateless chat: the frontend sends only `{ "message": "..." }` each request.
+# Avoid storing a global conversation that grows across all users/requests.
+SYSTEM_MESSAGE = {
+    "role": "system",
+    "content": (
+        "You are a concise assistant that only answers questions about Andrei Sirazitdinov's skills, competencies, prrojects, and background. "
+        "Reply in short bullet points (no bold). If the question is not about Andrei's skills, competencies, projects, and background, say you can only answer "
+        "questions about his skills, competencies, projects, and background and ask the user to rephrase. If a user pastes an open position description, read it and say whether Andrei is a good fit for it."
+        + (f"\n\nContext about Andrei:\n{andrei_context}" if andrei_context else "")
+    ),
+}
 
 @app.route("/")
 def index():
@@ -108,20 +108,21 @@ def static_files(filename):
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    user_input = request.json.get("message")
-    conversation.append({"role": "user", "content": user_input})
+    payload = request.get_json(silent=True) or {}
+    user_input = (payload.get("message") or "").strip()
+    if not user_input:
+        return "Message is required.", 400
 
     if not DEPLOYMENT_NAME:
         return "Chat is not configured. Missing AZURE_OPENAI_DEPLOYMENT.", 500
 
+    messages = [SYSTEM_MESSAGE, {"role": "user", "content": user_input}]
     response = client.chat.completions.create(
         model=DEPLOYMENT_NAME,
-        messages=conversation
+        messages=messages
     )
 
     reply = response.choices[0].message.content
-    conversation.append({"role": "assistant", "content": reply})
-
     return reply
 
 if __name__ == '__main__':

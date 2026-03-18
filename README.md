@@ -41,10 +41,45 @@ Only generate CSS that is used on the page, which results in a much smaller file
 npm run build
 ```
 
+Implementation details
+---------
+This repo produces a static CV site from `docs/index.html`, and optionally adds a chat assistant backend.
+
+### Static CV site (frontend)
+- `docs/index.html` contains the CV markup and links to the generated stylesheet (`./build.css`).
+- `tailwind.css` + `tailwind.config.js` + `postcss.config.js` define the styling pipeline.
+- `npm run build` generates `docs/build.css` for the frontend.
+
+### Chat assistant backend (Flask + Azure OpenAI)
+- The chat widget lives in `docs/index.html` under the `CHAT` section.
+- On submit, the browser sends `POST /chat` with JSON: `{ "message": "..." }`.
+- `cv_chat/app.py` is a Flask app that:
+  - serves the frontend from `docs/` (routes `/` and `/<path:filename>`)
+  - exposes `POST /chat` to generate answers using Azure OpenAI
+
+OpenAI usage
+- The backend creates an `AzureOpenAI` client using:
+  - `AZURE_OPENAI_API_KEY`
+  - `AZURE_OPENAI_ENDPOINT`
+- The deployed model name comes from `AZURE_OPENAI_DEPLOYMENT` and is passed as `model=...` to `client.chat.completions.create(...)`.
+- For each request, the backend uses a stateless message list:
+  - a `system` prompt with CV context
+  - the current user message only
+
+CV context injection
+- On startup, `cv_chat/app.py` parses `docs/index.html` and extracts readable text (headings, paragraphs, list items).
+- It also optionally appends extra content from `cv_chat/andrei_context.txt` (e.g., a `Git Repos:` section).
+- That combined text becomes part of the `system` prompt, so the assistant answers based on the CV content.
+
+### Required env vars for chat
+- `AZURE_OPENAI_API_KEY`
+- `AZURE_OPENAI_ENDPOINT`
+- `AZURE_OPENAI_DEPLOYMENT`
+
 Tutorial: What Was Done
 ---------
 
-This project was updated and deployed as a static résumé site. Below is a concise walkthrough of the changes and deployment flow so you can repeat it.
+This project was updated and deployed as a static résumé site (and can be extended with an optional chat backend). Below is a concise walkthrough of the changes and deployment flow so you can repeat it.
 
 ### 1) Update the content
 
@@ -132,6 +167,19 @@ $key = & "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" storage accoun
 
 $web
 ```
+
+### 7) Azure Container Apps deployment (CV + chat)
+This variant deploys `Dockerfile.chat` (Flask + chat) on Azure Container Apps.
+
+Implementation notes:
+- The built frontend (`docs/`) is copied into the image, and Flask serves it from `/`.
+- The chat endpoint is `POST /chat`, called by the chat widget in `docs/index.html`.
+- Azure OpenAI is used via environment variables:
+  - `AZURE_OPENAI_API_KEY`
+  - `AZURE_OPENAI_ENDPOINT`
+  - `AZURE_OPENAI_DEPLOYMENT`
+
+For the full Azure CLI commands, environment variable setup, and restart steps, see `tutorial.md`.
 
 Starting Point
 ---------

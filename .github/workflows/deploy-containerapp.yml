@@ -16,6 +16,7 @@ jobs:
       CONTAINERAPP_NAME: ${{ secrets.CONTAINERAPP_NAME }}
       AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
       AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+      AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,4 +46,5 @@ jobs:
             --image "$IMAGE" \
             --set-env-vars \
               AZURE_OPENAI_API_KEY="$AZURE_OPENAI_API_KEY" \
-              AZURE_OPENAI_ENDPOINT="$AZURE_OPENAI_ENDPOINT"
+              AZURE_OPENAI_ENDPOINT="$AZURE_OPENAI_ENDPOINT" \
+              AZURE_OPENAI_DEPLOYMENT="$AZURE_OPENAI_DEPLOYMENT"

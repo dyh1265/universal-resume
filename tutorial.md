@@ -1,4 +1,4 @@
-﻿Universal Resume: Tutorial
+Universal Resume: Tutorial
 =========================
 
 This guide covers editing the CV, building locally, and deploying to Azure (static or Container Apps), plus CI/CD.
@@ -73,7 +73,12 @@ $fqdn = & $az containerapp show --name $appName --resource-group $rg --query "pr
 Chat env vars:
 ```
 & $az containerapp update --name $appName --resource-group $rg `
-  --set-env-vars AZURE_OPENAI_API_KEY=YOUR_KEY AZURE_OPENAI_ENDPOINT=YOUR_ENDPOINT
+  --set-env-vars AZURE_OPENAI_API_KEY=YOUR_KEY AZURE_OPENAI_ENDPOINT=YOUR_ENDPOINT AZURE_OPENAI_DEPLOYMENT=YOUR_DEPLOYMENT
+```
+
+Restart Container App (without changing the image):
+```
+& $az containerapp restart --name $appName --resource-group $rg
 ```
 
 4) CI/CD (Container Apps)
@@ -83,7 +88,7 @@ Example workflow: `.github/workflows/deploy-containerapp.yml`.
 Secrets:
 - `AZURE_CREDENTIALS` (JSON from `az ad sp create-for-rbac --sdk-auth`)
 - `ACR_NAME`, `RESOURCE_GROUP`, `CONTAINERAPP_NAME`
-- `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT`
+- `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_DEPLOYMENT`
 
 Notes
 -----
