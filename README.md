@@ -5,6 +5,14 @@ Minimal and formal résumé (CV) website template for print, mobile, and desktop
 
 [Letter Size Demo](https://universal-resume.netlify.app/) | [Multiple Pages Demo](https://universal-resume-pages.netlify.app/) | [A4 Size Demo](https://universal-resume-a4.netlify.app/) | [Mobile Demo](http://www.responsinator.com/?url=https%3A%2F%2Funiversal-resume-pages.netlify.app%2F)
 
+### Live Cloud Demo (CV + “CV Assistant”)
+Open: https://resume-ca.reddesert-2728f1ca.germanywestcentral.azurecontainerapps.io/
+
+What to try:
+- Scroll to the **CHAT** section
+- Ask questions like “Summarize my experience” or “What are my research interests?”
+- The assistant answers based on your CV content (it extracts text from `docs/index.html`)
+
 **How to print or save as PDF?**  
 In Chrome, Right-click → Print. In Firefox, File → Print. More info [here](#printing).
 
@@ -75,6 +83,49 @@ CV context injection
 - `AZURE_OPENAI_API_KEY`
 - `AZURE_OPENAI_ENDPOINT`
 - `AZURE_OPENAI_DEPLOYMENT`
+
+### Tools used (by area)
+Frontend/CV build:
+- Node.js + npm
+- Tailwind CSS
+- PostCSS toolchain (`postcss-cli`, `postcss-import`, `@tailwindcss/postcss`)
+- CSS optimization during build (`cssnano`)
+- Live preview tooling (`live-server`, `concurrently`)
+
+Backend/chat:
+- Flask
+- Gunicorn (production WSGI server via `Dockerfile.chat`)
+- Python-dotenv (loads `cv_chat/.env`)
+- OpenAI Python SDK (`AzureOpenAI` client)
+
+Deployment/ops:
+- Docker (`Dockerfile` and `Dockerfile.chat`)
+- Azure Container Apps
+- Azure Container Registry (ACR)
+- Azure CLI (`az ...` commands in `tutorial.md`)
+- GitHub Actions (deploy via `.github/workflows/deploy-containerapp.yml`)
+
+Architecture (high level)
+---------
+```mermaid
+flowchart TD
+  U[User / Browser] -->|GET /| F[Flask server]
+  F --> D[Serves docs/\nCV frontend]
+  U -->|POST /chat {message}| F
+  F --> C[Extracts CV text from docs/index.html\nandrei_context.txt]
+  F --> AOAI[Azure OpenAI\n(deployment: AZURE_OPENAI_DEPLOYMENT)]
+  AOAI --> F
+  F --> U2[Assistant reply]
+```
+
+How to try the chat
+---------
+Use the chat widget on the live page (see “Live Cloud Demo” at the top).
+
+If you want to call the backend directly, send JSON to `POST /chat`:
+```
+{ "message": "Tell me about my research interests" }
+```
 
 Tutorial: What Was Done
 ---------
