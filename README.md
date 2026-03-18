@@ -109,13 +109,20 @@ Architecture (high level)
 ---------
 ```mermaid
 flowchart TD
-  U[User / Browser] -->|GET /| F[Flask server]
-  F --> D[Serves docs/ CV frontend]
-  U -->|POST /chat| F
-  F --> C[Extracts CV text from docs/index.html and cv_chat context]
-  F --> AOAI[Azure OpenAI (AZURE_OPENAI_DEPLOYMENT)]
-  AOAI --> F
-  F --> U2[Assistant reply]
+  U[User]
+  F[Flask server]
+  D[Serves docs frontend]
+  Q[Handles chat request]
+  C[Extracts CV context]
+  AOAI[Azure OpenAI]
+  R[Assistant reply]
+
+  U --> F
+  F --> D
+  F --> Q
+  Q --> C
+  C --> AOAI
+  AOAI --> R
 ```
 
 How to try the chat
