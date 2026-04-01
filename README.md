@@ -240,7 +240,7 @@ Implementation notes:
 For the full Azure CLI commands, environment variable setup, and restart steps, see `tutorial.md`.
 
 ### 8) Cost control (pause / resume)
-If you want to reduce costs while not actively sharing the demo, use these commands.
+If you want to reduce costs while not actively sharing the demo, use these commands. For the same steps plus **ACR image cleanup** and billing notes, see `tutorial.md` section **5) Managing costs**.
 
 PowerShell variables:
 ```
