@@ -239,6 +239,49 @@ Implementation notes:
 
 For the full Azure CLI commands, environment variable setup, and restart steps, see `tutorial.md`.
 
+### 8) Cost control (pause / resume)
+If you want to reduce costs while not actively sharing the demo, use these commands.
+
+PowerShell variables:
+```
+$az = "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd"
+$rg = "universal-resume-rg"
+$appName = "resume-ca"
+```
+
+Pause mode (non-destructive, scales to zero when idle):
+```
+& "$az" containerapp update --name "$appName" --resource-group "$rg" --min-replicas 0 --max-replicas 1
+```
+
+Optional immediate stop (deactivate latest revision):
+```
+$rev = & "$az" containerapp show --name "$appName" --resource-group "$rg" --query "properties.latestRevisionName" -o tsv
+& "$az" containerapp revision deactivate --name "$appName" --resource-group "$rg" --revision "$rev"
+```
+
+Verify current scale/replicas:
+```
+& "$az" containerapp show --name "$appName" --resource-group "$rg" --query "properties.template.scale" -o json
+& "$az" containerapp replica list --name "$appName" --resource-group "$rg" -o table
+```
+
+Resume:
+```
+& "$az" containerapp update --name "$appName" --resource-group "$rg" --min-replicas 1 --max-replicas 1
+```
+
+If you see `404 - This Container App is stopped or does not exist`, reactivate the latest revision:
+```
+$rev = & "$az" containerapp show --name "$appName" --resource-group "$rg" --query "properties.latestRevisionName" -o tsv
+& "$az" containerapp revision activate --name "$appName" --resource-group "$rg" --revision "$rev"
+```
+
+Deep hibernation (maximum savings, destructive):
+```
+& "$az" containerapp delete --name "$appName" --resource-group "$rg" --yes
+```
+
 Starting Point
 ---------
 
