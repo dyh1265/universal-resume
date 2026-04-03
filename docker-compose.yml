@@ -1,0 +1,22 @@
+# Self-hosted CV + chat (no Azure). Build and run on your own Linux server.
+#
+# 1) On the server, copy repo (or clone) and create .env beside this file with:
+#    AZURE_OPENAI_API_KEY=...
+#    AZURE_OPENAI_ENDPOINT=https://YOUR_RESOURCE.openai.azure.com
+#    AZURE_OPENAI_DEPLOYMENT=YOUR_DEPLOYMENT_NAME
+#    (This app still uses the Azure OpenAI API; point endpoint at your resource.)
+#
+# 2) docker compose up -d --build
+#
+# 3) Put Nginx/Caddy in front on 443 (see tutorial.md).
+
+services:
+  resume:
+    build:
+      context: .
+      dockerfile: Dockerfile.chat
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    restart: unless-stopped

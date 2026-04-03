@@ -1,7 +1,7 @@
 Universal Resume: Tutorial
 =========================
 
-This guide covers editing the CV, building locally, and deploying to Azure (static or Container Apps), plus CI/CD and **cost management** (Container Apps scale, ACR image cleanup).
+This guide covers editing the CV, building locally, **self-hosting on your own VPS (Docker)** or deploying to Azure (optional), plus CI/CD and **cost management** for Azure (if you still use it).
 
 Prerequisites
 -------------
@@ -33,6 +33,56 @@ Run dev server:
 ```
 npm run serve
 ```
+
+Self-hosting on your own server (no Azure hosting)
+--------------------------------------------------
+You can run the CV + chat on any **VPS** (Ubuntu, Debian, etc.) with **Docker**. You do **not** need Azure Container Apps, Azure DNS, or ACR.
+
+**Chat API (important):** `cv_chat/app.py` uses the **Azure OpenAI** HTTP API (`AzureOpenAI`). Moving off Azure *hosting* does not remove that unless you change the code: you still point `AZURE_OPENAI_ENDPOINT` at your **Azure OpenAI resource**, or you migrate the code to the public OpenAI API later.
+
+**1) On the server:** install Docker and the Docker Compose plugin.
+
+**2) Clone or copy the repo** to the server.
+
+**3) Create `.env` in the project root** (same folder as `docker-compose.yml`). Do not commit it. Example:
+
+```
+AZURE_OPENAI_API_KEY=your_key
+AZURE_OPENAI_ENDPOINT=https://YOUR_RESOURCE.openai.azure.com
+AZURE_OPENAI_DEPLOYMENT=your_deployment_name
+```
+
+**4) Build and run**
+
+```
+docker compose up -d --build
+```
+
+Default: app is on **port 8080**. To bind only on localhost (recommended when Nginx terminates TLS), edit `docker-compose.yml` ports to `127.0.0.1:8080:8080`.
+
+**5) HTTPS + your domain (e.g. sirazitdinov.com)**
+
+- DNS: **A** record for `@` → server public IP; **CNAME** `www` → your apex or directly to server if your DNS supports it.
+- Install **Nginx** or **Caddy** on the host.
+- Reverse proxy `https://your-domain` → `http://127.0.0.1:8080`.
+- Issue certificates with **Let's Encrypt** (e.g. `certbot --nginx`).
+
+Example Nginx `location` (inside your `server { ... }`):
+
+```
+location / {
+    proxy_pass http://127.0.0.1:8080;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+**6) Updates:** `git pull && docker compose up -d --build`
+
+**7) Firewall:** open **80** and **443** on the VPS; keep **8080** internal only if you use `127.0.0.1:8080:8080`.
 
 3) Container Apps (HTTPS, Paid)
 -------------------------------

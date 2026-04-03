@@ -4,3 +4,5 @@
 package-lock.json
 /docs/build.css
 /tmp/
+# Self-host: Docker Compose secrets (see docker-compose.yml)
+.env
