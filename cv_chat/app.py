@@ -6,7 +6,7 @@ from pathlib import Path
 
 import dotenv
 from flask import Flask, request, send_from_directory
-from openai import AzureOpenAI
+from openai import APIConnectionError, APIStatusError, AuthenticationError, AzureOpenAI, OpenAI
 
 dotenv.load_dotenv()
 
@@ -15,14 +15,44 @@ DOCS_DIR = BASE_DIR.parent / "docs"
 
 app = Flask(__name__, static_folder=str(DOCS_DIR), static_url_path="")
 
-client = AzureOpenAI(
-    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-    api_version="2024-02-15-preview",
-    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
-)
 
-DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT", "").strip()
+def _normalize_azure_endpoint(endpoint: str | None) -> str | None:
+    """Azure SDK expects https://RESOURCE.openai.azure.com without /openai/v1."""
+    if not endpoint:
+        return endpoint
+    e = endpoint.strip().rstrip("/")
+    for suffix in ("/openai/v1", "/openai"):
+        if e.endswith(suffix):
+            e = e[: -len(suffix)].rstrip("/")
+    return e
 
+
+def _chat_client_and_model():
+    """OpenAI-compatible API (api.openai.com, Ollama, vLLM, …) takes precedence over Azure."""
+    openai_key = os.getenv("OPENAI_API_KEY")
+    openai_base = os.getenv("OPENAI_BASE_URL")
+    if openai_key or openai_base:
+        client = OpenAI(
+            api_key=openai_key or "unused",
+            base_url=openai_base or None,
+        )
+        model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+        return client, model
+    azure_key = os.getenv("AZURE_OPENAI_API_KEY")
+    azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+    if azure_key and azure_endpoint:
+        endpoint = _normalize_azure_endpoint(azure_endpoint)
+        client = AzureOpenAI(
+            api_key=azure_key,
+            api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2024-02-15-preview"),
+            azure_endpoint=endpoint,
+        )
+        model = (os.getenv("AZURE_OPENAI_DEPLOYMENT") or "").strip() or "gpt-5.2-chat"
+        return client, model
+    return None, None
+
+
+client, chat_model = _chat_client_and_model()
 
 
 context_path = BASE_DIR / "andrei_context.txt"
@@ -108,19 +138,48 @@ def static_files(filename):
 
 @app.route("/chat", methods=["POST"])
 def chat():
+    if client is None:
+        return (
+            "Chat is not configured. For Ollama set OPENAI_BASE_URL (e.g. http://host.docker.internal:11434/v1) "
+            "and OPENAI_MODEL. For Azure set AZURE_OPENAI_*; for OpenAI.com set OPENAI_API_KEY.",
+            503,
+            {"Content-Type": "text/plain; charset=utf-8"},
+        )
+
     payload = request.get_json(silent=True) or {}
     user_input = (payload.get("message") or "").strip()
     if not user_input:
-        return "Message is required.", 400
-
-    if not DEPLOYMENT_NAME:
-        return "Chat is not configured. Missing AZURE_OPENAI_DEPLOYMENT.", 500
+        return ("Message is required.", 400, {"Content-Type": "text/plain; charset=utf-8"})
 
     messages = [SYSTEM_MESSAGE, {"role": "user", "content": user_input}]
-    response = client.chat.completions.create(
-        model=DEPLOYMENT_NAME,
-        messages=messages
-    )
+
+    try:
+        response = client.chat.completions.create(
+            model=chat_model,
+            messages=messages
+        )
+    except AuthenticationError:
+        return (
+            "Chat: the LLM API rejected the credentials (401). "
+            "Check OPENAI_API_KEY / AZURE_OPENAI_* in .env, then: docker compose up -d --build",
+            502,
+            {"Content-Type": "text/plain; charset=utf-8"},
+        )
+    except APIConnectionError as err:
+        return (
+            "Chat: cannot reach the LLM server. "
+            "If you use Ollama on the host, run `ollama serve`, pull a model (`ollama pull "
+            f"{chat_model}`), and check OPENAI_BASE_URL. ({err})",
+            502,
+            {"Content-Type": "text/plain; charset=utf-8"},
+        )
+    except APIStatusError as err:
+        msg = getattr(err, "message", str(err)) or str(err)
+        return (
+            f"Chat: the model API returned an error ({err.status_code}). {msg}",
+            502,
+            {"Content-Type": "text/plain; charset=utf-8"},
+        )
 
     reply = response.choices[0].message.content
     return reply
